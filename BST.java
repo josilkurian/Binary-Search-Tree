@@ -1,10 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package programmingassignment;
-
 import java.util.Scanner;
 
 /**
@@ -28,20 +21,20 @@ class Node{
 public class BST {
     static Node rootNode = null;
     static boolean nodeFoundFlag, displayFlag;
-    static int level = 0;
+    static int level = 0, deletionLevel=0;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
         Scanner scanner = new Scanner(System.in);
         BST bst = new BST();
         
         int choice = 1;
         while(choice != 0)
         {
-            System.out.println("Binary Search Tree Options:");
+            System.out.println("\nBinary Search Tree Options:");
             System.out.println("1. Insert\n2. Delete\n3. Search\n4. Min key value\n5. Max key value\n6. Successor\n7. Predecessor\n8. Traversal\n9. Delete all nodes\n0. Exit");
+            System.out.println("Enter your choice:");
             choice = scanner.nextInt();
             switch(choice){
                 case 1:
@@ -56,6 +49,7 @@ public class BST {
                     int keyToDelete = scanner.nextInt();
                     nodeFoundFlag = false;
                     level = 0;
+                    deletionLevel = 0;
                     bst.searchNode(rootNode, keyToDelete);
                     if(nodeFoundFlag == true){
                         level = 0;
@@ -180,7 +174,7 @@ public class BST {
                     node.parentNode.rightNode = null;
                 }
                 node = null;
-                System.out.println("Deleted node with key: "+key);
+                System.out.println("Deleted node with key: "+key+" from level:"+deletionLevel);
             }
             else if(null != node.leftNode && null == node.rightNode){
                 if(node == rootNode){
@@ -194,7 +188,7 @@ public class BST {
                 }
                 node.leftNode.parentNode = node.parentNode;
                 node = null;
-                System.out.println("Deleted node with key: "+key);
+                System.out.println("Deleted node with key: "+key+" from level:"+deletionLevel);
             }
             else if(null == node.leftNode && null != node.rightNode){
                 if(node == rootNode){
@@ -208,22 +202,24 @@ public class BST {
                 }
                 node.rightNode.parentNode = node.parentNode;
                 node = null;
-                System.out.println("Deleted node with key: "+key);
+                System.out.println("Deleted node with key: "+key+" from level:"+deletionLevel);
             }
             else{
                 Node successor = findSuccessor(node);
                 if (node == rootNode) {
                     if (isRightChildSuccessor(node, successor)) {
-
+                        successor.parentNode = null;
                     } else if (null != node.rightNode) {
                         successor.rightNode = node.rightNode;
+                        node.rightNode.parentNode = successor;
                     }
                     if (null != node.leftNode) {
                         successor.leftNode = node.leftNode;
+                        node.leftNode.parentNode = successor;
                     }
                     rootNode = successor;
                     node = null;
-                    System.out.println("Deleted node with key: " + key);
+                    System.out.println("Deleted node with key: " + key+" from level:"+deletionLevel);
                 }
                 else {
                     if (isLeftChild(node)) {
@@ -231,17 +227,20 @@ public class BST {
                     } else {
                         node.parentNode.rightNode = successor;
                     }
-                    successor.parentNode = node.parentNode;
                     if (isRightChildSuccessor(node, successor)) {
 
                     } else if (null != node.rightNode) {
                         successor.rightNode = node.rightNode;
+                        successor.parentNode.leftNode = null;
+                        node.rightNode.parentNode = successor;
                     }
                     if (null != node.leftNode) {
                         successor.leftNode = node.leftNode;
+                        node.leftNode.parentNode = successor;
                     }
+                    successor.parentNode = node.parentNode;
                     node = null;
-                    System.out.println("Deleted node with key: " + key);
+                    System.out.println("Deleted node with key: " + key+" from level:"+deletionLevel);
                 }
             }
         }
@@ -326,9 +325,13 @@ public class BST {
         else {
             if (null == rootNode) {
                 System.out.println("Tree is empty !");
-            } else if (null == rootNode.rightNode) {
+            } 
+            /*
+            else if (null == rootNode.rightNode) {
                 System.out.println("There is no successor for this node");
-            } else {
+            } 
+            */
+            else {
                 Node successor = findSuccessor(node);
                 if(null == successor){
                     System.out.println("There is no successor for this node");
@@ -388,6 +391,7 @@ public class BST {
                 if(displayFlag == true){
                     System.out.println("Node with key "+key+" found at depth: "+level+"\n");
                 }
+                deletionLevel = level;
                 nodeFoundFlag = true;
             }
             else if(key <= currentNode.key){
